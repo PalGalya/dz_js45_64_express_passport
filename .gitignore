@@ -1,0 +1,11 @@
+node_modules/
+# IntellijIdea files
+.idea/
+.DS_Store
+
+# Cookies and session files
+cookies.txt
+
+# Lock files
+yarn.lock
+package-lock.json
