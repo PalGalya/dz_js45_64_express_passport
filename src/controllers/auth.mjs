@@ -1,18 +1,27 @@
 import passport from '../auth/passport.mjs'
+import { users } from '../auth/passport.mjs'
 
 // Реєстрація нового користувача (спрощена версія)
 export const register = (req, res) => {
   const { email, password } = req.body
 
-  if (!email || !password) {
+  // Перевірка чи користувач вже існує
+  const existingUser = users.find((u) => u.email === email)
+  if (existingUser) {
     return res.status(400).json({
       status: 'error',
-      message: "Email та пароль є обов'язковими полями"
+      message: 'Користувач з таким email вже існує'
     })
   }
 
-  // В реальному додатку тут би була перевірка на існування користувача
-  // та збереження в базу даних з хешуванням пароля
+  // Створення нового користувача
+  const newUser = {
+    id: String(users.length + 1),
+    email,
+    password
+  }
+  users.push(newUser)
+
   res.status(201).json({
     status: 'success',
     message: 'Користувач успішно зареєстрований',
@@ -24,15 +33,6 @@ export const register = (req, res) => {
 
 // Авторизація користувача
 export const login = (req, res, next) => {
-  const { email, password } = req.body
-
-  if (!email || !password) {
-    return res.status(400).json({
-      status: 'error',
-      message: "Email та пароль є обов'язковими полями"
-    })
-  }
-
   passport.authenticate('local', (err, user, info) => {
     if (err) {
       return next(err)

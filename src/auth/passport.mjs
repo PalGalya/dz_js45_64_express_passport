@@ -2,7 +2,7 @@ import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 
 // Список користувачів (в реальному додатку це буде база даних)
-const users = [
+export const users = [
   {
     id: '1',
     email: 'admin@example.com',
