@@ -3,6 +3,10 @@ node_modules/
 .idea/
 .DS_Store
 
+# Environment variables
+.env
+.env.local
+
 # Cookies and session files
 cookies.txt
 
