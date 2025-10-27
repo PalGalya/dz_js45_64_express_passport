@@ -51,14 +51,22 @@ npm run dev
 
 ## 📡 API Endpoints
 
-| Метод | Маршрут           | Опис                                | Авторизація |
-| ----- | ----------------- | ----------------------------------- | ----------- |
-| POST  | `/auth/register`  | Реєстрація нового користувача       | Ні          |
-| POST  | `/auth/login`     | Вхід в систему                      | Ні          |
-| POST  | `/auth/logout`    | Вихід з системи                     | Так         |
-| GET   | `/auth/me`        | Отримати інформацію про користувача | Так         |
-| GET   | `/auth/protected` | Захищена сторінка (демонстрація)    | Так         |
-| GET   | `/api/products`   | Отримати список продуктів           | Ні          |
+| Метод  | Маршрут               | Опис                                |
+| ------ | --------------------- | ----------------------------------- | --- |
+| POST   | `/auth/register`      | Реєстрація нового користувача       |
+| POST   | `/auth/login`         | Вхід в систему                      |
+| POST   | `/auth/logout`        | Вихід з системи                     |
+| GET    | `/auth/me`            | Отримати інформацію про користувача | Так |
+| GET    | `/auth/protected`     | Захищена сторінка (демонстрація)    | Так |
+| GET    | `/api/products`       | Отримати список продуктів           | Ні  |
+| POST   | `/insertOne`          | Додавання одного документа          |
+| POST   | `/insertMany`         | Додавання багатьох документів       |
+| PUT    | `/updateOne`          | Оновлення одного документа          |
+| PUT    | `/updateMany`         | Оновлення багатьох документів       |
+| PUT    | `/replaceOne`         | Заміна одного документа             |
+| DELETE | `/deleteOne`          | Видалення одного документа          |
+| DELETE | `/deleteMany`         | Видалення багатьох документів       |
+| GET    | `/findWithProjection` | Читання даних з проекцією           |
 
 ### Приклади запитів
 
@@ -101,6 +109,70 @@ curl -X GET http://localhost:3000/api/products
 
 ```bash
 curl -X POST http://localhost:3000/auth/logout -b cookies.txt
+```
+
+**Додавання одного документа:**
+
+```bash
+curl -X POST http://localhost:3000/insertOne \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Product1","price":100}'
+```
+
+**Додавання багатьох документів:**
+
+```bash
+curl -X POST http://localhost:3000/insertMany \
+  -H "Content-Type: application/json" \
+  -d '[{"name":"Product1","price":100},{"name":"Product2","price":200}]'
+```
+
+**Оновлення одного документа:**
+
+```bash
+curl -X PUT http://localhost:3000/updateOne \
+  -H "Content-Type: application/json" \
+  -d '{"filter":{"name":"Product1"},"update":{"$set":{"price":150}}}'
+```
+
+**Оновлення багатьох документів:**
+
+```bash
+curl -X PUT http://localhost:3000/updateMany \
+  -H "Content-Type: application/json" \
+  -d '{"filter":{"price":{"$lt":200}},"update":{"$set":{"price":200}}}'
+```
+
+**Заміна одного документа:**
+
+```bash
+curl -X PUT http://localhost:3000/replaceOne \
+  -H "Content-Type: application/json" \
+  -d '{"filter":{"name":"Product1"},"replacement":{"name":"Product1","price":300}}'
+```
+
+**Видалення одного документа:**
+
+```bash
+curl -X DELETE http://localhost:3000/deleteOne \
+  -H "Content-Type: application/json" \
+  -d '{"filter":{"name":"Product1"}}'
+```
+
+**Видалення багатьох документів:**
+
+```bash
+curl -X DELETE http://localhost:3000/deleteMany \
+  -H "Content-Type: application/json" \
+  -d '{"filter":{"price":{"$lt":200}}}'
+```
+
+**Читання даних з проекцією:**
+
+```bash
+curl -X GET http://localhost:3000/findWithProjection \
+  -H "Content-Type: application/json" \
+  -d '{"filter":{},"projection":{"name":1}}'
 ```
 
 ## 👥 Тестові користувачі
