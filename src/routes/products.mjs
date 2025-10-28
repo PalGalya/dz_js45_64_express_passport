@@ -5,7 +5,7 @@ import {
   getProductById,
   createProduct
 } from '../controllers/products.mjs'
-import { getCollection } from '../db/mongodb.mjs'
+import Product from '../models/product.mjs'
 import { requireAuth } from '../middleware/auth.mjs'
 
 const router = express.Router()
@@ -43,8 +43,8 @@ router.post(
 // Insert one document
 router.post('/insertOne', requireAuth, async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const result = await collection.insertOne(req.body)
+    const product = new Product(req.body)
+    const result = await product.save()
     res.status(201).json({ message: 'Document inserted', result })
   } catch (error) {
     res.status(500).json({ error: 'Failed to insert document', details: error })
@@ -54,8 +54,7 @@ router.post('/insertOne', requireAuth, async (req, res) => {
 // Insert many documents
 router.post('/insertMany', requireAuth, async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const result = await collection.insertMany(req.body)
+    const result = await Product.insertMany(req.body)
     res.status(201).json({ message: 'Documents inserted', result })
   } catch (error) {
     res
@@ -67,8 +66,7 @@ router.post('/insertMany', requireAuth, async (req, res) => {
 // Update one document
 router.put('/updateOne', requireAuth, async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const result = await collection.updateOne(req.body.filter, req.body.update)
+    const result = await Product.updateOne(req.body.filter, req.body.update)
     res.status(200).json({ message: 'Document updated', result })
   } catch (error) {
     res.status(500).json({ error: 'Failed to update document', details: error })
@@ -78,8 +76,7 @@ router.put('/updateOne', requireAuth, async (req, res) => {
 // Update many documents
 router.put('/updateMany', requireAuth, async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const result = await collection.updateMany(req.body.filter, req.body.update)
+    const result = await Product.updateMany(req.body.filter, req.body.update)
     res.status(200).json({ message: 'Documents updated', result })
   } catch (error) {
     res
@@ -91,8 +88,7 @@ router.put('/updateMany', requireAuth, async (req, res) => {
 // Replace one document
 router.put('/replaceOne', requireAuth, async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const result = await collection.replaceOne(
+    const result = await Product.replaceOne(
       req.body.filter,
       req.body.replacement
     )
@@ -107,8 +103,7 @@ router.put('/replaceOne', requireAuth, async (req, res) => {
 // Delete one document
 router.delete('/deleteOne', requireAuth, async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const result = await collection.deleteOne(req.body.filter)
+    const result = await Product.deleteOne(req.body.filter)
     res.status(200).json({ message: 'Document deleted', result })
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete document', details: error })
@@ -118,8 +113,7 @@ router.delete('/deleteOne', requireAuth, async (req, res) => {
 // Delete many documents
 router.delete('/deleteMany', requireAuth, async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const result = await collection.deleteMany(req.body.filter)
+    const result = await Product.deleteMany(req.body.filter)
     res.status(200).json({ message: 'Documents deleted', result })
   } catch (error) {
     res
@@ -131,10 +125,7 @@ router.delete('/deleteMany', requireAuth, async (req, res) => {
 // Enhanced data reading with projection
 router.post('/findWithProjection', requireAuth, async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const result = await collection
-      .find(req.body.filter, req.body.projection)
-      .toArray()
+    const result = await Product.find(req.body.filter, req.body.projection)
     res.status(200).json({ message: 'Data retrieved', result })
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve data', details: error })

@@ -1,5 +1,5 @@
 import express from 'express'
-import { getCollection } from '../db/mongodb.mjs'
+import Product from '../models/product.mjs'
 
 const router = express.Router()
 
@@ -9,11 +9,10 @@ const router = express.Router()
  */
 router.get('/products', async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const cursor = collection.find()
+    const cursor = Product.find().cursor()
 
     const products = []
-    await cursor.forEach((doc) => products.push(doc))
+    await cursor.eachAsync((doc) => products.push(doc))
 
     res.status(200).json({
       message: 'Products processed using cursor with forEach',
@@ -33,14 +32,13 @@ router.get('/products', async (req, res) => {
  */
 router.get('/products/batch', async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const cursor = collection.find()
+    const cursor = Product.find().cursor()
 
     const batchSize = parseInt(req.query.batchSize) || 5
     const products = []
     let batch = []
 
-    await cursor.forEach((doc) => {
+    await cursor.eachAsync((doc) => {
       batch.push(doc)
       if (batch.length === batchSize) {
         products.push([...batch])
@@ -72,15 +70,17 @@ router.get('/products/batch', async (req, res) => {
  */
 router.get('/products/stream', async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const cursor = collection.find()
+    const cursor = Product.find().cursor()
 
     const products = []
     let processedCount = 0
 
     // Simulate streaming by processing one document at a time
-    while (await cursor.hasNext()) {
-      const doc = await cursor.next()
+    for (
+      let doc = await cursor.next();
+      doc != null;
+      doc = await cursor.next()
+    ) {
       products.push(doc)
       processedCount++
     }

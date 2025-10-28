@@ -1,5 +1,5 @@
 import express from 'express'
-import { getCollection } from '../db/mongodb.mjs'
+import Product from '../models/product.mjs'
 
 const router = express.Router()
 
@@ -9,34 +9,31 @@ const router = express.Router()
  */
 router.get('/products/stats', async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const stats = await collection
-      .aggregate([
-        {
-          $group: {
-            _id: null,
-            averagePrice: { $avg: '$price' },
-            maxPrice: { $max: '$price' },
-            minPrice: { $min: '$price' },
-            totalProducts: { $sum: 1 },
-            uniqueCategories: { $addToSet: '$category' },
-            totalValue: { $sum: '$price' }
-          }
-        },
-        {
-          $project: {
-            _id: 0,
-            averagePrice: { $round: ['$averagePrice', 2] },
-            maxPrice: 1,
-            minPrice: 1,
-            totalProducts: 1,
-            uniqueCategories: 1,
-            totalValue: { $round: ['$totalValue', 2] },
-            categoryCount: { $size: '$uniqueCategories' }
-          }
+    const stats = await Product.aggregate([
+      {
+        $group: {
+          _id: null,
+          averagePrice: { $avg: '$price' },
+          maxPrice: { $max: '$price' },
+          minPrice: { $min: '$price' },
+          totalProducts: { $sum: 1 },
+          uniqueCategories: { $addToSet: '$category' },
+          totalValue: { $sum: '$price' }
         }
-      ])
-      .toArray()
+      },
+      {
+        $project: {
+          _id: 0,
+          averagePrice: { $round: ['$averagePrice', 2] },
+          maxPrice: 1,
+          minPrice: 1,
+          totalProducts: 1,
+          uniqueCategories: 1,
+          totalValue: { $round: ['$totalValue', 2] },
+          categoryCount: { $size: '$uniqueCategories' }
+        }
+      }
+    ])
 
     res.status(200).json({
       message: 'General product statistics',
@@ -55,33 +52,30 @@ router.get('/products/stats', async (req, res) => {
  */
 router.get('/products/by-category', async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const stats = await collection
-      .aggregate([
-        {
-          $group: {
-            _id: '$category',
-            count: { $sum: 1 },
-            averagePrice: { $avg: '$price' },
-            maxPrice: { $max: '$price' },
-            minPrice: { $min: '$price' },
-            totalValue: { $sum: '$price' }
-          }
-        },
-        {
-          $project: {
-            category: '$_id',
-            _id: 0,
-            count: 1,
-            averagePrice: { $round: ['$averagePrice', 2] },
-            maxPrice: 1,
-            minPrice: 1,
-            totalValue: { $round: ['$totalValue', 2] }
-          }
-        },
-        { $sort: { count: -1 } }
-      ])
-      .toArray()
+    const stats = await Product.aggregate([
+      {
+        $group: {
+          _id: '$category',
+          count: { $sum: 1 },
+          averagePrice: { $avg: '$price' },
+          maxPrice: { $max: '$price' },
+          minPrice: { $min: '$price' },
+          totalValue: { $sum: '$price' }
+        }
+      },
+      {
+        $project: {
+          category: '$_id',
+          _id: 0,
+          count: 1,
+          averagePrice: { $round: ['$averagePrice', 2] },
+          maxPrice: 1,
+          minPrice: 1,
+          totalValue: { $round: ['$totalValue', 2] }
+        }
+      },
+      { $sort: { count: -1 } }
+    ])
 
     res.status(200).json({
       message: 'Product statistics by category',
@@ -100,22 +94,19 @@ router.get('/products/by-category', async (req, res) => {
  */
 router.get('/products/price-ranges', async (req, res) => {
   try {
-    const collection = await getCollection('products')
-    const stats = await collection
-      .aggregate([
-        {
-          $bucket: {
-            groupBy: '$price',
-            boundaries: [0, 50, 100, 200, 500, 1000],
-            default: '1000+',
-            output: {
-              count: { $sum: 1 },
-              products: { $push: { name: '$name', price: '$price' } }
-            }
+    const stats = await Product.aggregate([
+      {
+        $bucket: {
+          groupBy: '$price',
+          boundaries: [0, 5000, 15000, 25000, 50000, 100000],
+          default: '100000+',
+          output: {
+            count: { $sum: 1 },
+            products: { $push: { name: '$name', price: '$price' } }
           }
         }
-      ])
-      .toArray()
+      }
+    ])
 
     res.status(200).json({
       message: 'Product distribution by price ranges',

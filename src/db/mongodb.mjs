@@ -1,18 +1,10 @@
-import { MongoClient } from 'mongodb'
+import mongoose from 'mongoose'
 import { CONFIG } from '../config.mjs'
 
-let client = null
-let db = null
-
 /**
- * Підключення до MongoDB Atlas
- * @returns {Promise<import('mongodb').Db>} - Database instance
+ * Підключення до MongoDB Atlas через Mongoose
  */
 export async function connectToDatabase() {
-  if (db) {
-    return db
-  }
-
   try {
     const uri = CONFIG.MONGODB_URI
 
@@ -20,56 +12,51 @@ export async function connectToDatabase() {
       throw new Error('MONGODB_URI is not defined in environment variables')
     }
 
-    client = new MongoClient(uri, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000
+    // Додаємо обробники подій підключення
+    mongoose.connection.on('connected', () => {
+      console.log('✅ Successfully connected to MongoDB Atlas via Mongoose')
     })
 
-    await client.connect()
+    mongoose.connection.on('error', (err) => {
+      console.error('❌ Mongoose connection error:', err)
+    })
 
-    console.log('✅ Successfully connected to MongoDB Atlas')
+    mongoose.connection.on('disconnected', () => {
+      console.log('❌ Mongoose connection disconnected')
+    })
 
-    // Отримуємо назву бази даних з конфігурації
-    const dbName = CONFIG.DB_NAME || 'expressApp'
-    db = client.db(dbName)
+    // Підключаємося до бази даних
+    await mongoose.connect(uri)
 
-    return db
+    return mongoose.connection
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error.message)
+    console.error('❌ Mongoose connection error:', error.message)
     throw error
   }
 }
 
 /**
- * Отримання колекції з бази даних
- * @param {string} collectionName - Назва колекції
- * @returns {Promise<import('mongodb').Collection>}
- */
-export async function getCollection(collectionName) {
-  const database = await connectToDatabase()
-  return database.collection(collectionName)
-}
-
-/**
- * Закриття з'єднання з базою даних
+ * Закриття з'єднання з базою даних через Mongoose
  */
 export async function closeDatabase() {
-  if (client) {
-    await client.close()
-    client = null
-    db = null
-    console.log('🔌 MongoDB connection closed')
+  try {
+    await mongoose.connection.close()
+    console.log('🔌 Mongoose connection closed')
+  } catch (error) {
+    console.error('❌ Error closing Mongoose connection:', error.message)
   }
 }
 
 /**
- * Перевірка підключення до бази даних
+ * Перевірка підключення до бази даних через Mongoose
  * @returns {Promise<boolean>}
  */
 export async function checkConnection() {
   try {
-    const database = await connectToDatabase()
-    await database.command({ ping: 1 })
+    if (mongoose.connection.readyState !== 1) {
+      return false
+    }
+    await mongoose.connection.db.admin().ping()
     return true
   } catch (error) {
     console.error('Database connection check failed:', error.message)
