@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb'
+import { CONFIG } from '../config.mjs'
 
 let client = null
 let db = null
@@ -13,7 +14,7 @@ export async function connectToDatabase() {
   }
 
   try {
-    const uri = process.env.MONGODB_URI
+    const uri = CONFIG.MONGODB_URI
 
     if (!uri) {
       throw new Error('MONGODB_URI is not defined in environment variables')
@@ -28,8 +29,8 @@ export async function connectToDatabase() {
 
     console.log('✅ Successfully connected to MongoDB Atlas')
 
-    // Отримуємо назву бази даних з URI або використовуємо за замовчуванням
-    const dbName = process.env.MONGODB_DB_NAME || 'expressApp'
+    // Отримуємо назву бази даних з конфігурації
+    const dbName = CONFIG.DB_NAME || 'expressApp'
     db = client.db(dbName)
 
     return db

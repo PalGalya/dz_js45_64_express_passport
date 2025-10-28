@@ -6,6 +6,7 @@ import {
   createProduct
 } from '../controllers/products.mjs'
 import { getCollection } from '../db/mongodb.mjs'
+import { requireAuth } from '../middleware/auth.mjs'
 
 const router = express.Router()
 
@@ -27,6 +28,7 @@ router.get('/:id', getProductById)
  */
 router.post(
   '/',
+  requireAuth,
   celebrate({
     [Segments.BODY]: Joi.object({
       name: Joi.string().required().min(3).max(100),
@@ -39,7 +41,7 @@ router.post(
 )
 
 // Insert one document
-router.post('/insertOne', async (req, res) => {
+router.post('/insertOne', requireAuth, async (req, res) => {
   try {
     const collection = await getCollection('products')
     const result = await collection.insertOne(req.body)
@@ -50,7 +52,7 @@ router.post('/insertOne', async (req, res) => {
 })
 
 // Insert many documents
-router.post('/insertMany', async (req, res) => {
+router.post('/insertMany', requireAuth, async (req, res) => {
   try {
     const collection = await getCollection('products')
     const result = await collection.insertMany(req.body)
@@ -63,7 +65,7 @@ router.post('/insertMany', async (req, res) => {
 })
 
 // Update one document
-router.put('/updateOne', async (req, res) => {
+router.put('/updateOne', requireAuth, async (req, res) => {
   try {
     const collection = await getCollection('products')
     const result = await collection.updateOne(req.body.filter, req.body.update)
@@ -74,7 +76,7 @@ router.put('/updateOne', async (req, res) => {
 })
 
 // Update many documents
-router.put('/updateMany', async (req, res) => {
+router.put('/updateMany', requireAuth, async (req, res) => {
   try {
     const collection = await getCollection('products')
     const result = await collection.updateMany(req.body.filter, req.body.update)
@@ -87,7 +89,7 @@ router.put('/updateMany', async (req, res) => {
 })
 
 // Replace one document
-router.put('/replaceOne', async (req, res) => {
+router.put('/replaceOne', requireAuth, async (req, res) => {
   try {
     const collection = await getCollection('products')
     const result = await collection.replaceOne(
@@ -103,7 +105,7 @@ router.put('/replaceOne', async (req, res) => {
 })
 
 // Delete one document
-router.delete('/deleteOne', async (req, res) => {
+router.delete('/deleteOne', requireAuth, async (req, res) => {
   try {
     const collection = await getCollection('products')
     const result = await collection.deleteOne(req.body.filter)
@@ -114,7 +116,7 @@ router.delete('/deleteOne', async (req, res) => {
 })
 
 // Delete many documents
-router.delete('/deleteMany', async (req, res) => {
+router.delete('/deleteMany', requireAuth, async (req, res) => {
   try {
     const collection = await getCollection('products')
     const result = await collection.deleteMany(req.body.filter)
@@ -127,7 +129,7 @@ router.delete('/deleteMany', async (req, res) => {
 })
 
 // Enhanced data reading with projection
-router.post('/findWithProjection', async (req, res) => {
+router.post('/findWithProjection', requireAuth, async (req, res) => {
   try {
     const collection = await getCollection('products')
     const result = await collection
