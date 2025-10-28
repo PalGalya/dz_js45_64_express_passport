@@ -51,22 +51,24 @@ npm run dev
 
 ## 📡 API Endpoints
 
-| Метод  | Маршрут               | Опис                                |
-| ------ | --------------------- | ----------------------------------- | --- |
-| POST   | `/auth/register`      | Реєстрація нового користувача       |
-| POST   | `/auth/login`         | Вхід в систему                      |
-| POST   | `/auth/logout`        | Вихід з системи                     |
-| GET    | `/auth/me`            | Отримати інформацію про користувача | Так |
-| GET    | `/auth/protected`     | Захищена сторінка (демонстрація)    | Так |
-| GET    | `/api/products`       | Отримати список продуктів           | Ні  |
-| POST   | `/insertOne`          | Додавання одного документа          |
-| POST   | `/insertMany`         | Додавання багатьох документів       |
-| PUT    | `/updateOne`          | Оновлення одного документа          |
-| PUT    | `/updateMany`         | Оновлення багатьох документів       |
-| PUT    | `/replaceOne`         | Заміна одного документа             |
-| DELETE | `/deleteOne`          | Видалення одного документа          |
-| DELETE | `/deleteMany`         | Видалення багатьох документів       |
-| GET    | `/findWithProjection` | Читання даних з проекцією           |
+| Метод  | Маршрут                            | Опис                                |
+| ------ | ---------------------------------- | ----------------------------------- | --- |
+| POST   | `/auth/register`                   | Реєстрація нового користувача       |
+| POST   | `/auth/login`                      | Вхід в систему                      |
+| POST   | `/auth/logout`                     | Вихід з системи                     |
+| GET    | `/auth/me`                         | Отримати інформацію про користувача | Так |
+| GET    | `/auth/protected`                  | Захищена сторінка (демонстрація)    | Так |
+| GET    | `/api/products`                    | Отримати список продуктів           | Ні  |
+| GET    | `/api/products/:id`                | Отримати продукт за ID              | Ні  |
+| POST   | `/api/products`                    | Створити новий продукт              | Так |
+| POST   | `/api/products/insertOne`          | Додавання одного документа          | Так |
+| POST   | `/api/products/insertMany`         | Додавання багатьох документів       | Так |
+| PUT    | `/api/products/updateOne`          | Оновлення одного документа          | Так |
+| PUT    | `/api/products/updateMany`         | Оновлення багатьох документів       | Так |
+| PUT    | `/api/products/replaceOne`         | Заміна одного документа             | Так |
+| DELETE | `/api/products/deleteOne`          | Видалення одного документа          | Так |
+| DELETE | `/api/products/deleteMany`         | Видалення багатьох документів       | Так |
+| POST   | `/api/products/findWithProjection` | Читання даних з проекцією           | Так |
 
 ### Приклади запитів
 
@@ -114,23 +116,23 @@ curl -X POST http://localhost:3000/auth/logout -b cookies.txt
 **Додавання одного документа:**
 
 ```bash
-curl -X POST http://localhost:3000/insertOne \
+curl -X POST http://localhost:3000/api/products/insertOne \
   -H "Content-Type: application/json" \
-  -d '{"name":"Product1","price":100}'
+  -d '{"name":"Product1","price":100,"description":"Description","category":"Category"}'
 ```
 
 **Додавання багатьох документів:**
 
 ```bash
-curl -X POST http://localhost:3000/insertMany \
+curl -X POST http://localhost:3000/api/products/insertMany \
   -H "Content-Type: application/json" \
-  -d '[{"name":"Product1","price":100},{"name":"Product2","price":200}]'
+  -d '[{"name":"Product1","price":100,"description":"Description 1","category":"Category 1"},{"name":"Product2","price":200,"description":"Description 2","category":"Category 2"}]'
 ```
 
 **Оновлення одного документа:**
 
 ```bash
-curl -X PUT http://localhost:3000/updateOne \
+curl -X PUT http://localhost:3000/api/products/updateOne \
   -H "Content-Type: application/json" \
   -d '{"filter":{"name":"Product1"},"update":{"$set":{"price":150}}}'
 ```
@@ -138,7 +140,7 @@ curl -X PUT http://localhost:3000/updateOne \
 **Оновлення багатьох документів:**
 
 ```bash
-curl -X PUT http://localhost:3000/updateMany \
+curl -X PUT http://localhost:3000/api/products/updateMany \
   -H "Content-Type: application/json" \
   -d '{"filter":{"price":{"$lt":200}},"update":{"$set":{"price":200}}}'
 ```
@@ -146,15 +148,15 @@ curl -X PUT http://localhost:3000/updateMany \
 **Заміна одного документа:**
 
 ```bash
-curl -X PUT http://localhost:3000/replaceOne \
+curl -X PUT http://localhost:3000/api/products/replaceOne \
   -H "Content-Type: application/json" \
-  -d '{"filter":{"name":"Product1"},"replacement":{"name":"Product1","price":300}}'
+  -d '{"filter":{"name":"Product1"},"replacement":{"name":"Product1","price":300,"description":"New description","category":"Category"}}'
 ```
 
 **Видалення одного документа:**
 
 ```bash
-curl -X DELETE http://localhost:3000/deleteOne \
+curl -X DELETE http://localhost:3000/api/products/deleteOne \
   -H "Content-Type: application/json" \
   -d '{"filter":{"name":"Product1"}}'
 ```
@@ -162,7 +164,7 @@ curl -X DELETE http://localhost:3000/deleteOne \
 **Видалення багатьох документів:**
 
 ```bash
-curl -X DELETE http://localhost:3000/deleteMany \
+curl -X DELETE http://localhost:3000/api/products/deleteMany \
   -H "Content-Type: application/json" \
   -d '{"filter":{"price":{"$lt":200}}}'
 ```
@@ -170,9 +172,9 @@ curl -X DELETE http://localhost:3000/deleteMany \
 **Читання даних з проекцією:**
 
 ```bash
-curl -X GET http://localhost:3000/findWithProjection \
+curl -X POST http://localhost:3000/api/products/findWithProjection \
   -H "Content-Type: application/json" \
-  -d '{"filter":{},"projection":{"name":1}}'
+  -d '{"filter":{},"projection":{"name":1,"price":1,"_id":0}}'
 ```
 
 ## 👥 Тестові користувачі
