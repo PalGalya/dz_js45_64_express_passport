@@ -298,3 +298,44 @@ dz_js45_64_express_passport/
 - Базу даних для користувачів
 - Безпечні змінні оточення
 - HTTPS для secure cookies
+
+## ⚠️ Обробка помилок
+
+- У проекті реалізовано обробку помилок валідації через middleware `celebrate`.
+- Для цього використовується `app.use(errors())`, що автоматично обробляє помилки валідації та повертає відповідь у форматі JSON.
+
+### Приклад помилки валідації
+
+```bash
+curl -X POST http://localhost:3000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"invalid","password":"123"}'
+```
+
+**Відповідь:**
+
+```json
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "Validation failed",
+  "validation": {
+    "body": {
+      "email": "must be a valid email",
+      "password": "length must be at least 6 characters long"
+    }
+  }
+}
+```
+
+### ⚡ Вимоги до пароля
+
+- Пароль повинен містити мінімум 6 символів.
+
+### Приклад реєстрації з валідним паролем
+
+```bash
+curl -X POST http://localhost:3000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"secure123"}'
+```
