@@ -34,7 +34,10 @@ router.post(
       name: Joi.string().required().min(3).max(100),
       price: Joi.number().required().min(0),
       description: Joi.string().required().min(10).max(500),
-      category: Joi.string().required().min(3).max(50)
+      category: Joi.string()
+        .required()
+        .valid('electronics', 'clothing', 'food', 'furniture'),
+      stock: Joi.number().optional().min(0)
     })
   }),
   createProduct

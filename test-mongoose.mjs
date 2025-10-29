@@ -18,6 +18,7 @@ async function testMongooseIntegration() {
     const testProduct = new Product({
       name: 'Test Product',
       price: 100,
+      description: 'This is a test product for testing purposes',
       category: 'electronics',
       stock: 5
     })

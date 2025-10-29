@@ -1,34 +1,45 @@
 import passport from '../auth/passport.mjs'
-import { users } from '../auth/passport.mjs'
+import User from '../models/user.mjs'
 
-// Реєстрація нового користувача (спрощена версія)
-export const register = (req, res) => {
-  const { email, password } = req.body
+// Реєстрація нового користувача
+export const register = async (req, res) => {
+  try {
+    const { email, password, username } = req.body
 
-  // Перевірка чи користувач вже існує
-  const existingUser = users.find((u) => u.email === email)
-  if (existingUser) {
-    return res.status(400).json({
+    // Перевірка чи користувач вже існує
+    const existingUser = await User.findOne({ email })
+    if (existingUser) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Користувач з таким email вже існує'
+      })
+    }
+
+    // Створення нового користувача
+    const newUser = new User({
+      username: username || email.split('@')[0], // використовуємо частину email як username
+      email,
+      password
+    })
+
+    await newUser.save()
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Користувач успішно зареєстрований',
+      data: {
+        id: newUser._id,
+        username: newUser.username,
+        email: newUser.email
+      }
+    })
+  } catch (error) {
+    res.status(500).json({
       status: 'error',
-      message: 'Користувач з таким email вже існує'
+      message: 'Помилка при реєстрації користувача',
+      details: error.message
     })
   }
-
-  // Створення нового користувача
-  const newUser = {
-    id: String(users.length + 1),
-    email,
-    password
-  }
-  users.push(newUser)
-
-  res.status(201).json({
-    status: 'success',
-    message: 'Користувач успішно зареєстрований',
-    data: {
-      email: email
-    }
-  })
 }
 
 // Авторизація користувача
@@ -56,7 +67,8 @@ export const login = (req, res, next) => {
         message: 'Авторизація пройшла успішно',
         data: {
           user: {
-            id: user.id,
+            id: user._id,
+            username: user.username,
             email: user.email
           }
         }
@@ -86,7 +98,8 @@ export const getCurrentUser = (req, res) => {
       status: 'success',
       data: {
         user: {
-          id: req.user.id,
+          id: req.user._id,
+          username: req.user.username,
           email: req.user.email
         }
       }

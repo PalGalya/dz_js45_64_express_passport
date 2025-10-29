@@ -6,6 +6,7 @@ import router from './routes/index.mjs'
 import { errors } from 'celebrate'
 import { connectToDatabase, closeDatabase } from './db/mongodb.mjs'
 import { seedProducts } from './controllers/products.mjs'
+import { initTestUsers } from './utils/initUsers.mjs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -62,6 +63,7 @@ async function startServer() {
 
     // Ініціалізація тестових даних
     await seedProducts()
+    await initTestUsers()
 
     // Запуск сервера
     app.listen(PORT, () => {

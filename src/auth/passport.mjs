@@ -1,19 +1,6 @@
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
-
-// Список користувачів (в реальному додатку це буде база даних)
-export const users = [
-  {
-    id: '1',
-    email: 'admin@example.com',
-    password: 'password123'
-  },
-  {
-    id: '2',
-    email: 'user@example.com',
-    password: 'userpass'
-  }
-]
+import User from '../models/user.mjs'
 
 // Налаштовуємо локальну стратегію з використанням email
 passport.use(
@@ -22,34 +9,40 @@ passport.use(
       usernameField: 'email',
       passwordField: 'password'
     },
-    (email, password, done) => {
-      console.log('Спроба авторизації для email:', email)
+    async (email, password, done) => {
+      try {
+        console.log('Спроба авторизації для email:', email)
 
-      const user = users.find(
-        (u) => u.email === email && u.password === password
-      )
+        const user = await User.findOne({ email })
 
-      if (user) {
-        return done(null, user)
+        if (user && user.password === password) {
+          return done(null, user)
+        }
+
+        return done(null, false, { message: 'Невірний email або пароль' })
+      } catch (error) {
+        return done(error)
       }
-
-      return done(null, false, { message: 'Невірний email або пароль' })
     }
   )
 )
 
 // Серіалізація користувача (збереження в сесії)
 passport.serializeUser((user, done) => {
-  done(null, user.id)
+  done(null, user._id.toString())
 })
 
 // Десеріалізація користувача (отримання з сесії)
-passport.deserializeUser((id, done) => {
-  const user = users.find((u) => u.id === id)
-  if (user) {
-    done(null, user)
-  } else {
-    done(new Error('Користувача не знайдено'))
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id)
+    if (user) {
+      done(null, user)
+    } else {
+      done(new Error('Користувача не знайдено'))
+    }
+  } catch (error) {
+    done(error)
   }
 })
 

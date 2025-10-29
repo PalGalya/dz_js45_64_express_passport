@@ -93,30 +93,40 @@ export const seedProducts = async () => {
         {
           name: 'Ноутбук Dell XPS 13',
           price: 45000,
+          description:
+            'Портативний ноутбук з високою продуктивністю для професійної роботи',
           category: 'electronics',
           stock: 10
         },
         {
           name: 'Смартфон iPhone 15 Pro',
           price: 52000,
+          description:
+            'Найновіший смартфон Apple з титановим корпусом та чіпом A17 Pro',
           category: 'electronics',
           stock: 5
         },
         {
           name: 'Навушники Sony WH-1000XM5',
           price: 12000,
+          description:
+            'Бездротові навушники з активним шумоподавленням найвищого класу',
           category: 'electronics',
           stock: 15
         },
         {
           name: 'Клавіатура Logitech MX Keys',
           price: 4500,
+          description:
+            'Бездротова клавіатура з підсвічуванням для максимального комфорту набору',
           category: 'electronics',
           stock: 20
         },
         {
           name: 'Монітор LG UltraWide 34"',
           price: 18000,
+          description:
+            'Широкоформатний монітор для підвищення продуктивності та ігор',
           category: 'electronics',
           stock: 8
         }

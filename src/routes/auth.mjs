@@ -10,8 +10,17 @@ import { celebrate, Joi, Segments } from 'celebrate'
 
 const router = Router()
 
-// Валідація для реєстрації та входу
-const authValidation = celebrate({
+// Валідація для реєстрації
+const registerValidation = celebrate({
+  [Segments.BODY]: Joi.object().keys({
+    username: Joi.string().min(3).max(30).optional(),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required()
+  })
+})
+
+// Валідація для входу
+const loginValidation = celebrate({
   [Segments.BODY]: Joi.object().keys({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required()
@@ -19,10 +28,10 @@ const authValidation = celebrate({
 })
 
 // Реєстрація
-router.post('/register', authValidation, register)
+router.post('/register', registerValidation, register)
 
 // Вхід
-router.post('/login', authValidation, login)
+router.post('/login', loginValidation, login)
 
 // Вихід (потребує авторизації)
 router.post('/logout', requireAuth, logout)
@@ -37,7 +46,8 @@ router.get('/protected', requireAuth, (req, res) => {
     message: 'Ви успішно потрапили на захищену сторінку!',
     data: {
       user: {
-        id: req.user.id,
+        id: req.user._id,
+        username: req.user.username,
         email: req.user.email
       },
       timestamp: new Date().toISOString()
