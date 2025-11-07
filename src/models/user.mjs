@@ -1,46 +1,39 @@
 import mongoose from 'mongoose'
 
+/**
+ * User Schema для MongoDB
+ * Використовуються Mongoose для валідації та управління даними
+ */
 const userSchema = new mongoose.Schema(
   {
-    username: {
+    email: {
       type: String,
-      required: [true, 'Username is required'],
+      required: [true, 'Email is required'],
       unique: true,
-      trim: true,
-      minlength: [3, 'Username must be at least 3 characters long'],
-      maxlength: [30, 'Username cannot exceed 30 characters']
+      lowercase: true,
+      match: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        'Please provide a valid email'
+      ]
     },
     password: {
       type: String,
       required: [true, 'Password is required'],
       minlength: [6, 'Password must be at least 6 characters long']
     },
-    email: {
+    id: {
       type: String,
-      required: [true, 'Email is required'],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/.+@.+\..+/, 'Please provide a valid email address']
-    },
-    role: {
-      type: String,
-      default: 'user',
-      enum: {
-        values: ['user', 'admin'],
-        message: '{VALUE} is not a valid role'
-      }
+      required: true,
+      unique: true
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    collection: 'users'
   }
 )
 
-// Додаємо індекси для оптимізації запитів
-userSchema.index({ username: 1 })
+// Індекс для оптимізації пошуку по email
 userSchema.index({ email: 1 })
 
-const User = mongoose.model('User', userSchema)
-
-export default User
+export default mongoose.model('User', userSchema)

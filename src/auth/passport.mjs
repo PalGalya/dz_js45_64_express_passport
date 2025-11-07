@@ -1,8 +1,10 @@
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
-import User from '../models/user.mjs'
+import User from '../models/User.mjs'
 
-// Налаштовуємо локальну стратегію з використанням email
+/**
+ * Налаштування локальної стратегії з використанням Mongoose
+ */
 passport.use(
   new LocalStrategy(
     {
@@ -11,31 +13,43 @@ passport.use(
     },
     async (email, password, done) => {
       try {
-        console.log('Спроба авторизації для email:', email)
+        console.log('🔐 Спроба авторизації для email:', email)
 
+        // Пошук користувача в БД
         const user = await User.findOne({ email })
 
-        if (user && user.password === password) {
-          return done(null, user)
+        if (!user) {
+          return done(null, false, { message: 'Невірний email або пароль' })
         }
 
-        return done(null, false, { message: 'Невірний email або пароль' })
+        // Перевірка пароля (в реальному додатку використовуйте bcrypt)
+        if (user.password !== password) {
+          return done(null, false, { message: 'Невірний email або пароль' })
+        }
+
+        console.log('✅ Користувач успішно авторизований:', email)
+        return done(null, user)
       } catch (error) {
+        console.error('❌ Помилка при авторизації:', error)
         return done(error)
       }
     }
   )
 )
 
-// Серіалізація користувача (збереження в сесії)
+/**
+ * Серіалізація користувача (збереження в сесії)
+ */
 passport.serializeUser((user, done) => {
-  done(null, user._id.toString())
+  done(null, user.id)
 })
 
-// Десеріалізація користувача (отримання з сесії)
+/**
+ * Десеріалізація користувача (отримання з сесії)
+ */
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findById(id)
+    const user = await User.findOne({ id })
     if (user) {
       done(null, user)
     } else {

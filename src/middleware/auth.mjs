@@ -1,5 +1,7 @@
-// Middleware для перевірки, чи користувач авторизований
-export const requireAuth = (req, res, next) => {
+/**
+ * Middleware для перевірки, чи користувач авторизований
+ */
+export const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next()
   }
@@ -9,3 +11,6 @@ export const requireAuth = (req, res, next) => {
     message: 'Необхідна авторизація для доступу до цього ресурсу'
   })
 }
+
+// Alias для зворотної сумісності
+export const requireAuth = isAuthenticated

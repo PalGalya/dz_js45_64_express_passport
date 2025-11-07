@@ -1,10 +1,12 @@
+import User from '../models/User.mjs'
 import passport from '../auth/passport.mjs'
-import User from '../models/user.mjs'
 
-// Реєстрація нового користувача
+/**
+ * Реєстрація нового користувача
+ */
 export const register = async (req, res) => {
   try {
-    const { email, password, username } = req.body
+    const { email, password } = req.body
 
     // Перевірка чи користувач вже існує
     const existingUser = await User.findOne({ email })
@@ -15,11 +17,15 @@ export const register = async (req, res) => {
       })
     }
 
+    // Генерація унікального ID
+    const lastUser = await User.findOne().sort({ id: -1 })
+    const newId = lastUser ? String(parseInt(lastUser.id) + 1) : '1'
+
     // Створення нового користувача
     const newUser = new User({
-      username: username || email.split('@')[0], // використовуємо частину email як username
       email,
-      password
+      password,
+      id: newId
     })
 
     await newUser.save()
@@ -28,21 +34,24 @@ export const register = async (req, res) => {
       status: 'success',
       message: 'Користувач успішно зареєстрований',
       data: {
-        id: newUser._id,
-        username: newUser.username,
-        email: newUser.email
+        user: {
+          id: newUser.id,
+          email: newUser.email
+        }
       }
     })
   } catch (error) {
+    console.error('Error registering user:', error)
     res.status(500).json({
       status: 'error',
-      message: 'Помилка при реєстрації користувача',
-      details: error.message
+      message: error.message || 'Помилка при реєстрації користувача'
     })
   }
 }
 
-// Авторизація користувача
+/**
+ * Авторизація користувача
+ */
 export const login = (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) {
@@ -67,8 +76,7 @@ export const login = (req, res, next) => {
         message: 'Авторизація пройшла успішно',
         data: {
           user: {
-            id: user._id,
-            username: user.username,
+            id: user.id,
             email: user.email
           }
         }
@@ -77,7 +85,9 @@ export const login = (req, res, next) => {
   })(req, res, next)
 }
 
-// Вихід з системи
+/**
+ * Вихід з системи
+ */
 export const logout = (req, res, next) => {
   req.logout((err) => {
     if (err) {
@@ -91,15 +101,16 @@ export const logout = (req, res, next) => {
   })
 }
 
-// Отримання інформації про поточного користувача
+/**
+ * Отримання інформації про поточного користувача
+ */
 export const getCurrentUser = (req, res) => {
   if (req.isAuthenticated()) {
     res.json({
       status: 'success',
       data: {
         user: {
-          id: req.user._id,
-          username: req.user.username,
+          id: req.user.id,
           email: req.user.email
         }
       }
@@ -110,4 +121,27 @@ export const getCurrentUser = (req, res) => {
       message: 'Користувач не авторизований'
     })
   }
+}
+
+/**
+ * Захищена сторінка (демонстрація)
+ */
+export const getProtected = (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Доступ заборонено - користувач не авторизований'
+    })
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Це захищена сторінка',
+    data: {
+      user: {
+        id: req.user.id,
+        email: req.user.email
+      }
+    }
+  })
 }

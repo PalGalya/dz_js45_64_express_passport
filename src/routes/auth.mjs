@@ -3,56 +3,50 @@ import {
   register,
   login,
   logout,
-  getCurrentUser
+  getCurrentUser,
+  getProtected
 } from '../controllers/auth.mjs'
-import { requireAuth } from '../middleware/auth.mjs'
+import { isAuthenticated } from '../middleware/auth.mjs'
 import { celebrate, Joi, Segments } from 'celebrate'
 
 const router = Router()
 
-// Валідація для реєстрації
-const registerValidation = celebrate({
-  [Segments.BODY]: Joi.object().keys({
-    username: Joi.string().min(3).max(30).optional(),
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).required()
-  })
-})
-
-// Валідація для входу
-const loginValidation = celebrate({
+// Валідація для реєстрації та входу
+const authValidation = celebrate({
   [Segments.BODY]: Joi.object().keys({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required()
   })
 })
 
-// Реєстрація
-router.post('/register', registerValidation, register)
+/**
+ * @route POST /auth/register
+ * @desc Реєстрація нового користувача
+ */
+router.post('/register', authValidation, register)
 
-// Вхід
-router.post('/login', loginValidation, login)
+/**
+ * @route POST /auth/login
+ * @desc Вхід в систему
+ */
+router.post('/login', authValidation, login)
 
-// Вихід (потребує авторизації)
-router.post('/logout', requireAuth, logout)
+/**
+ * @route POST /auth/logout
+ * @desc Вихід з системи (потребує авторизації)
+ */
+router.post('/logout', isAuthenticated, logout)
 
-// Отримання інформації про поточного користувача
-router.get('/me', requireAuth, getCurrentUser)
+/**
+ * @route GET /auth/me
+ * @desc Отримання інформації про поточного користувача
+ */
+router.get('/me', isAuthenticated, getCurrentUser)
 
-// Захищений маршрут
-router.get('/protected', requireAuth, (req, res) => {
-  res.json({
-    status: 'success',
-    message: 'Ви успішно потрапили на захищену сторінку!',
-    data: {
-      user: {
-        id: req.user._id,
-        username: req.user.username,
-        email: req.user.email
-      },
-      timestamp: new Date().toISOString()
-    }
-  })
-})
+/**
+ * @route GET /auth/protected
+ * @desc Захищена сторінка (демонстрація)
+ */
+router.get('/protected', isAuthenticated, getProtected)
 
 export default router
