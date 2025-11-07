@@ -6,34 +6,41 @@ import mongoose from 'mongoose'
  */
 const userSchema = new mongoose.Schema(
   {
-    email: {
+    username: {
       type: String,
-      required: [true, 'Email is required'],
+      required: [true, 'Username is required'],
       unique: true,
-      lowercase: true,
-      match: [
-        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        'Please provide a valid email'
-      ]
+      trim: true,
+      minlength: [3, 'Username must be at least 3 characters long'],
+      maxlength: [30, 'Username cannot exceed 30 characters']
     },
     password: {
       type: String,
       required: [true, 'Password is required'],
       minlength: [6, 'Password must be at least 6 characters long']
     },
-    id: {
+    email: {
       type: String,
-      required: true,
-      unique: true
+      required: [true, 'Email is required'],
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [/.+@.+\..+/, 'Please provide a valid email address']
+    },
+    role: {
+      type: String,
+      default: 'user',
+      enum: {
+        values: ['user', 'admin'],
+        message: '{VALUE} is not a valid role'
+      }
     }
   },
   {
-    timestamps: true,
-    collection: 'users'
+    timestamps: true
   }
 )
 
-// Індекс для оптимізації пошуку по email
-userSchema.index({ email: 1 })
+const User = mongoose.model('User', userSchema)
 
-export default mongoose.model('User', userSchema)
+export default User

@@ -37,16 +37,8 @@ router.post(
       description: Joi.string().required().min(10).max(500),
       category: Joi.string()
         .required()
-        .valid(
-          'Электроника',
-          'Аксесуари',
-          'Ноутбуки',
-          'Монітори',
-          'Навушники',
-          'Клавіатури',
-          'Миші',
-          'Інше'
-        )
+        .valid('electronics', 'clothing', 'food', 'furniture'),
+      stock: Joi.number().optional().min(0)
     })
   }),
   createProduct

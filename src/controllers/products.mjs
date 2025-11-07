@@ -1,4 +1,4 @@
-import Product from '../models/Product.mjs'
+import Product from '../models/product.mjs'
 
 /**
  * Отримати всі продукти з бази даних
@@ -29,8 +29,7 @@ export const getAllProducts = async (req, res) => {
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params
-
-    const product = await Product.findOne({ id: parseInt(id) })
+    const product = await Product.findById(id)
 
     if (!product) {
       return res.status(404).json({
@@ -57,18 +56,14 @@ export const getProductById = async (req, res) => {
  */
 export const createProduct = async (req, res) => {
   try {
-    const { name, price, description, category } = req.body
-
-    // Отримуємо максимальний ID для створення нового
-    const lastProduct = await Product.findOne().sort({ id: -1 })
-    const newId = lastProduct ? lastProduct.id + 1 : 1
+    const { name, price, description, category, stock } = req.body
 
     const newProduct = new Product({
-      id: newId,
       name,
       price,
       description,
-      category
+      category,
+      stock
     })
 
     await newProduct.save()
@@ -162,39 +157,39 @@ export const seedProducts = async () => {
     if (count === 0) {
       const sampleProducts = [
         {
-          id: 1,
           name: 'Ноутбук Dell XPS 13',
           price: 45000,
           description: 'Потужний ультрабук для роботи та розваг',
-          category: 'Ноутбуки'
+          category: 'electronics',
+          stock: 10
         },
         {
-          id: 2,
           name: 'Смартфон iPhone 15 Pro',
           price: 52000,
           description: 'Флагманський смартфон від Apple',
-          category: 'Электроника'
+          category: 'electronics',
+          stock: 5
         },
         {
-          id: 3,
           name: 'Навушники Sony WH-1000XM5',
           price: 12000,
           description: 'Бездротові навушники з шумозаглушенням',
-          category: 'Навушники'
+          category: 'electronics',
+          stock: 15
         },
         {
-          id: 4,
-          name: 'Клавіатура Logitech MX Keys',
+          name: 'Стіл офісний IKEA',
           price: 4500,
-          description: 'Механічна клавіатура для продуктивної роботи',
-          category: 'Клавіатури'
+          description: 'Зручний стіл для домашнього офісу',
+          category: 'furniture',
+          stock: 8
         },
         {
-          id: 5,
-          name: 'Монітор LG UltraWide 34"',
-          price: 18000,
-          description: 'Широкоформатний монітор для багатозадачності',
-          category: 'Монітори'
+          name: 'Футболка Cotton 100%',
+          price: 800,
+          description: 'Якісна бавовняна футболка',
+          category: 'clothing',
+          stock: 25
         }
       ]
 

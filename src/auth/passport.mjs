@@ -1,6 +1,6 @@
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
-import User from '../models/User.mjs'
+import User from '../models/user.mjs'
 
 /**
  * Налаштування локальної стратегії з використанням Mongoose
@@ -41,7 +41,7 @@ passport.use(
  * Серіалізація користувача (збереження в сесії)
  */
 passport.serializeUser((user, done) => {
-  done(null, user.id)
+  done(null, user._id.toString())
 })
 
 /**
@@ -49,7 +49,7 @@ passport.serializeUser((user, done) => {
  */
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findOne({ id })
+    const user = await User.findById(id)
     if (user) {
       done(null, user)
     } else {
