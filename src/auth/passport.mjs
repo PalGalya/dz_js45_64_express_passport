@@ -1,55 +1,64 @@
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
+import bcrypt from 'bcrypt'
+import User from '../models/user.mjs'
 
-// Список користувачів (в реальному додатку це буде база даних)
-export const users = [
-  {
-    id: '1',
-    email: 'admin@example.com',
-    password: 'password123'
-  },
-  {
-    id: '2',
-    email: 'user@example.com',
-    password: 'userpass'
-  }
-]
-
-// Налаштовуємо локальну стратегію з використанням email
+/**
+ * Налаштування локальної стратегії з використанням Mongoose
+ */
 passport.use(
   new LocalStrategy(
     {
       usernameField: 'email',
       passwordField: 'password'
     },
-    (email, password, done) => {
-      console.log('Спроба авторизації для email:', email)
+    async (email, password, done) => {
+      try {
+        console.log('🔐 Спроба авторизації для email:', email)
 
-      const user = users.find(
-        (u) => u.email === email && u.password === password
-      )
+        // Пошук користувача в БД
+        const user = await User.findOne({ email })
 
-      if (user) {
+        if (!user) {
+          return done(null, false, { message: 'Невірний email або пароль' })
+        }
+
+        // Порівняння хешованого пароля
+        const isPasswordValid = await bcrypt.compare(password, user.password)
+        if (!isPasswordValid) {
+          return done(null, false, { message: 'Невірний email або пароль' })
+        }
+
+        console.log('✅ Користувач успішно авторизований:', email)
         return done(null, user)
+      } catch (error) {
+        console.error('❌ Помилка при авторизації:', error)
+        return done(error)
       }
-
-      return done(null, false, { message: 'Невірний email або пароль' })
     }
   )
 )
 
-// Серіалізація користувача (збереження в сесії)
+/**
+ * Серіалізація користувача (збереження в сесії)
+ */
 passport.serializeUser((user, done) => {
-  done(null, user.id)
+  done(null, user._id.toString())
 })
 
-// Десеріалізація користувача (отримання з сесії)
-passport.deserializeUser((id, done) => {
-  const user = users.find((u) => u.id === id)
-  if (user) {
-    done(null, user)
-  } else {
-    done(new Error('Користувача не знайдено'))
+/**
+ * Десеріалізація користувача (отримання з сесії)
+ */
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id)
+    if (user) {
+      done(null, user)
+    } else {
+      done(new Error('Користувача не знайдено'))
+    }
+  } catch (error) {
+    done(error)
   }
 })
 
