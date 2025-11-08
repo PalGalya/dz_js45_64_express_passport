@@ -29,7 +29,7 @@ export const getAllProducts = async (req, res) => {
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params
-    const product = await Product.findById(id)
+    const product = await Product.findOne({ id: parseInt(id) })
 
     if (!product) {
       return res.status(404).json({
@@ -56,14 +56,22 @@ export const getProductById = async (req, res) => {
  */
 export const createProduct = async (req, res) => {
   try {
-    const { name, price, description, category, stock } = req.body
+    const { name, price, description, category, stock, image, rating } =
+      req.body
+
+    // Отримуємо максимальний id для створення нового
+    const lastProduct = await Product.findOne().sort({ id: -1 })
+    const newId = lastProduct ? lastProduct.id + 1 : 1
 
     const newProduct = new Product({
+      id: newId,
       name,
       price,
       description,
       category,
-      stock
+      stock: stock || 0,
+      image: image || null,
+      rating: rating || 0
     })
 
     await newProduct.save()
@@ -157,39 +165,54 @@ export const seedProducts = async () => {
     if (count === 0) {
       const sampleProducts = [
         {
+          id: 1,
           name: 'Ноутбук Dell XPS 13',
           price: 45000,
           description: 'Потужний ультрабук для роботи та розваг',
           category: 'electronics',
-          stock: 10
+          stock: 10,
+          image: null,
+          rating: 4.5
         },
         {
+          id: 2,
           name: 'Смартфон iPhone 15 Pro',
           price: 52000,
           description: 'Флагманський смартфон від Apple',
           category: 'electronics',
-          stock: 5
+          stock: 5,
+          image: null,
+          rating: 4.8
         },
         {
+          id: 3,
           name: 'Навушники Sony WH-1000XM5',
           price: 12000,
           description: 'Бездротові навушники з шумозаглушенням',
           category: 'electronics',
-          stock: 15
+          stock: 15,
+          image: null,
+          rating: 4.7
         },
         {
+          id: 4,
           name: 'Стіл офісний IKEA',
           price: 4500,
           description: 'Зручний стіл для домашнього офісу',
           category: 'furniture',
-          stock: 8
+          stock: 8,
+          image: null,
+          rating: 4.2
         },
         {
+          id: 5,
           name: 'Футболка Cotton 100%',
           price: 800,
           description: 'Якісна бавовняна футболка',
           category: 'clothing',
-          stock: 25
+          stock: 25,
+          image: null,
+          rating: 4.0
         }
       ]
 

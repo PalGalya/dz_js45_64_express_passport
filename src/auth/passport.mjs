@@ -1,5 +1,6 @@
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
+import bcrypt from 'bcrypt'
 import User from '../models/user.mjs'
 
 /**
@@ -22,8 +23,9 @@ passport.use(
           return done(null, false, { message: 'Невірний email або пароль' })
         }
 
-        // Перевірка пароля (в реальному додатку використовуйте bcrypt)
-        if (user.password !== password) {
+        // Порівняння хешованого пароля
+        const isPasswordValid = await bcrypt.compare(password, user.password)
+        if (!isPasswordValid) {
           return done(null, false, { message: 'Невірний email або пароль' })
         }
 

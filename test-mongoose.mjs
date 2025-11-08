@@ -16,11 +16,14 @@ async function testMongooseIntegration() {
 
     // Тестування створення продукту
     const testProduct = new Product({
+      id: Math.floor(Math.random() * 10000),
       name: 'Test Product',
       price: 100,
       description: 'This is a test product for testing purposes',
       category: 'electronics',
-      stock: 5
+      stock: 5,
+      image: 'test.jpg',
+      rating: 4.0
     })
 
     const savedProduct = await testProduct.save()

@@ -1,4 +1,5 @@
 import User from '../models/user.mjs'
+import bcrypt from 'bcrypt'
 
 export const initTestUsers = async () => {
   try {
@@ -8,17 +9,23 @@ export const initTestUsers = async () => {
     if (existingUsers === 0) {
       console.log('Створюємо тестових користувачів...')
 
+      // Гешуємо паролі
+      const hashedPasswordAdmin = await bcrypt.hash('password123', 10)
+      const hashedPasswordUser = await bcrypt.hash('userpass', 10)
+
       const testUsers = [
         {
+          id: 'admin1',
           username: 'admin',
           email: 'admin@example.com',
-          password: 'password123',
+          password: hashedPasswordAdmin,
           role: 'admin'
         },
         {
+          id: 'user1',
           username: 'user',
           email: 'user@example.com',
-          password: 'userpass',
+          password: hashedPasswordUser,
           role: 'user'
         }
       ]

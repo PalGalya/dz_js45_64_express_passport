@@ -57,16 +57,13 @@ router.put(
       price: Joi.number().min(0),
       description: Joi.string().min(10).max(500),
       category: Joi.string().valid(
-        'Электроника',
-        'Аксесуари',
-        'Ноутбуки',
-        'Монітори',
-        'Навушники',
-        'Клавіатури',
-        'Миші',
-        'Інше'
+        'electronics',
+        'clothing',
+        'food',
+        'furniture'
       ),
       stock: Joi.number().min(0),
+      image: Joi.string().optional(),
       rating: Joi.number().min(0).max(5)
     }).min(1)
   }),

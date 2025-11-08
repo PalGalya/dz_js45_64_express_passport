@@ -6,6 +6,11 @@ import mongoose from 'mongoose'
  */
 const productSchema = new mongoose.Schema(
   {
+    id: {
+      type: Number,
+      required: [true, 'Product ID is required'],
+      unique: true
+    },
     name: {
       type: String,
       required: [true, 'Product name is required'],
@@ -33,10 +38,20 @@ const productSchema = new mongoose.Schema(
         message: '{VALUE} is not a valid category'
       }
     },
+    image: {
+      type: String,
+      default: null
+    },
     stock: {
       type: Number,
       default: 0,
       min: [0, 'Stock cannot be negative']
+    },
+    rating: {
+      type: Number,
+      default: 0,
+      min: [0, 'Rating cannot be less than 0'],
+      max: [5, 'Rating cannot be more than 5']
     }
   },
   {

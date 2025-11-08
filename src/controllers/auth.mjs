@@ -1,12 +1,13 @@
 import User from '../models/user.mjs'
 import passport from '../auth/passport.mjs'
+import bcrypt from 'bcrypt'
 
 /**
  * Реєстрація нового користувача
  */
 export const register = async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { email, password, username } = req.body
 
     // Перевірка чи користувач вже існує
     const existingUser = await User.findOne({ email })
@@ -21,11 +22,15 @@ export const register = async (req, res) => {
     const lastUser = await User.findOne().sort({ id: -1 })
     const newId = lastUser ? String(parseInt(lastUser.id) + 1) : '1'
 
+    // Хешування пароля
+    const hashedPassword = await bcrypt.hash(password, 10)
+
     // Створення нового користувача
     const newUser = new User({
+      id: newId,
+      username: username || email.split('@')[0],
       email,
-      password,
-      id: newId
+      password: hashedPassword
     })
 
     await newUser.save()
